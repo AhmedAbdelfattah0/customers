@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { ICustomer } from '../../shared/interfaces';
 
 @Component({
@@ -7,12 +7,35 @@ import { ICustomer } from '../../shared/interfaces';
   styleUrls: ['./customers-list.component.css']
 })
 export class CustomersListComponent implements OnInit {
+  private _customers: ICustomer[] = [];
+
+
+  @Input() get customers(): ICustomer[] {
+    return this._customers;
+  }
+
+  set customers(value: ICustomer[]) {
+    if (value) {
+      this.filteredCustomers = this._customers = value;
+      this.calculateOrders();
+    }
+  }
   filteredCustomers: ICustomer[];
-  customersOrderTotal: Number;
+  customersOrderTotal: number;
   currencyCode: String = 'USD';
   constructor() { }
 
   ngOnInit() {
   }
 
+  calculateOrders() {
+    this.customersOrderTotal = 0;
+    this.filteredCustomers.forEach((cust: ICustomer) => {
+      this.customersOrderTotal += cust.orderTotal;
+    });
+  }
+
+  sort(prop: string) {
+
+  }
 }
