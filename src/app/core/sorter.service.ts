@@ -1,10 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient , } from '@angular/common/http';
-
-import {Observable} from "rxjs";
-import { map, catchError } from 'rxjs/operators';
-
-import { ICustomer, IOrder } from '../../app/shared/interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -12,4 +6,51 @@ import { ICustomer, IOrder } from '../../app/shared/interfaces';
 export class SorterService {
 
   constructor() { }
+
+
+  property: string = null;
+  direction: number = 1;
+
+  sort(collection: any[], prop: any) {
+    this.property = prop;
+    this.direction = (this.property === prop) ? this.direction * -1 : 1;
+
+    collection.sort((a: any, b: any) => {
+      let aVal: any;
+      let bVal: any;
+
+      //Handle resolving complex properties such as 'state.name' for prop value
+      if (prop && prop.indexOf('.') > -1) {
+        aVal = this.resolveProperty(prop, a);
+        bVal = this.resolveProperty(prop, b);
+      }
+      else {
+        aVal = a[prop];
+        bVal = b[prop];
+      }
+ 
+      if (this.isString(aVal)) aVal = aVal.trim().toUpperCase();
+      if (this.isString(bVal)) bVal = bVal.trim().toUpperCase();
+
+      if (aVal === bVal) {
+        return 0;
+      }
+      else if (aVal > bVal) {
+        return this.direction * -1;
+      }
+      else {
+        return this.direction * 1;
+      }
+    });
+  }
+
+  isString(val: any): boolean {
+    return (val && (typeof val === 'string' || val instanceof String));
+  }
+
+  resolveProperty(path: string, obj: any) {
+    return path.split('.').reduce(function (prev, curr) {
+      return (prev ? prev[curr] : undefined)
+    }, obj || self)
+  }
 }
